@@ -2,6 +2,9 @@ package bank;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import mware_lib.NameService;
+import mware_lib.ObjectBroker;
+
 /**
  * Klasse fuer den Mananger der Bank.
  *
@@ -14,16 +17,20 @@ public class Bank extends branch_access.Manager {
 	
 	private int AccountCounter;  // Kontnummernzaehler
 	private Object NumberFormatted[] = new Object[1]; // zum Formatieren
+	private ObjectBroker objBroker;
 	
 	
 	/**
 	 * Konstruktor.
 	 * 
 	 * @param accountPrefix Prefix fuer (bankuebergreifend) eindeutige Konto-IDs
+	 * @param port 
+	 * @param address 
 	 */
-	public Bank(String accountPrefix) {
+	public Bank(String accountPrefix, String address, int port) {
 		AccountTable = new Hashtable<String, Account>();
 		OwnerTable = new Hashtable<String, String>();
+		objBroker = ObjectBroker.getBroker(address, port);
 		
 		// Kontnummernzaehler initialisieren
 		AccountCounter = 999;  
@@ -66,10 +73,9 @@ public class Bank extends branch_access.Manager {
 		// ID des neuen Kontos
 		String newID = newAccount.getID();
 
-		/* -----------------------------------
-		 * TODO: Im Namensdienst anmelden
-		 * -----------------------------------
-		 */
+		//NamensdienstAnmeldung
+		NameService nameSvc = objBroker.getNameService();
+		nameSvc.rebind(newAccount, newID);
 		
 		return newID;
 	}
@@ -108,24 +114,33 @@ public class Bank extends branch_access.Manager {
 	 */
 	public static void main(String[] args) {
 		String myName;  // fuer Titelleiste
-		String myPrefix = "A";   // fuer Konto-IDs
+		String myPrefix = "DJ";   // fuer Konto-IDs
 
-		if (args.length>0 && !args[0].equals("--help")) {
+		if (args.length>= 3 && !args[0].equals("--help")) {
 			myName = args[0];
+			String address = args[1];
+			int port;
+			ObjectBroker objBroker;
+			
+			try{
+				port = Integer.parseInt(args[2]);
+				objBroker = ObjectBroker.getBroker(address, port);
+			}catch (Exception e) {
+				System.err.println("Usage: java bank.Bank <name> <name-service-host> <name-service-port>");
+				return;
+			}
 			
 			// Manager
-			Bank myBank = new Bank(myPrefix);
+			Bank myBank = new Bank(myPrefix, address, port);
 			
 			// GUI
 			BankWindow myGUI = new BankWindow(myName, myBank);
 			myGUI.setVisible(true);
 			new Thread(myGUI).start();  // Aktualisierungsthread der GUI
 			
-			/* ---------------------------------------
-			 * TODO: Manager im Namensdienst anmelden
-			 * ---------------------------------------
-			 */
-
+			// Anmeldung beim Namensdienst
+			NameService nameSvc = objBroker.getNameService();
+			nameSvc.rebind(myBank, myName);
 			
 		} else {
 			System.err.println("Usage: java bank.Bank <name> <name-service-host> <name-service-port>");
@@ -134,7 +149,16 @@ public class Bank extends branch_access.Manager {
 
 	@Override
 	public boolean removeAccount(String accountID) {
-		// TODO Auto-generated method stub
-		return false;
+		if(!AccountTable.contains(accountID)) return false;
+		
+		// ...aus die Anzeigeiste
+		AccountTable.remove(accountID);
+		OwnerTable.remove(accountID);
+		
+		// ...indirekte abmeldung
+		NameService nameSvc = objBroker.getNameService();
+		nameSvc.rebind(null, accountID);
+		
+		return nameSvc.resolve(accountID) == null;
 	}
 }
