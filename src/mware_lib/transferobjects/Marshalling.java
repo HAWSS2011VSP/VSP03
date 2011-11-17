@@ -15,8 +15,10 @@ public class Marshalling {
   
   static {
     try {
-      JAXBContext context = JAXBContext.newInstance(BindingContainer.class,
-          ObjectRequest.class);
+      JAXBContext context = JAXBContext.newInstance(
+          BindingContainer.class,
+          ObjectRequest.class,
+          ObjectReply.class);
       marshaller = context.createMarshaller();
       unmarshaller = context.createUnmarshaller();
     } catch(JAXBException e) {

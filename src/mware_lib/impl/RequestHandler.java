@@ -8,6 +8,7 @@ import java.net.Socket;
 import mware_lib.impl.NameServiceImpl.NameServiceStorage;
 import mware_lib.transferobjects.BindingContainer;
 import mware_lib.transferobjects.Marshalling;
+import mware_lib.transferobjects.ObjectReply;
 import mware_lib.transferobjects.ObjectRequest;
 import mware_lib.transferobjects.Stringifier;
 
@@ -62,7 +63,8 @@ final class RequestHandler implements Runnable {
   private void handle(ObjectRequest request) throws IOException {
     System.out.println("Object with key " + request.getId() + " requested...");
     Object returnObj = storage.get(request.getId());
-    client.getOutputStream().write(
-        (Stringifier.stringify(returnObj) + "\n").getBytes());
+    client.getOutputStream().write((Marshalling.marshal(
+      new ObjectReply(request.getId(), 
+          Stringifier.stringify(returnObj))) + "\n").getBytes());
   }
 }

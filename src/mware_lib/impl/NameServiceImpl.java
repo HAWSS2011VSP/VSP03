@@ -1,6 +1,8 @@
 package mware_lib.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,8 +15,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import mware_lib.NameService;
+import mware_lib.transferobjects.BindingContainer;
+import mware_lib.transferobjects.Marshalling;
+import mware_lib.transferobjects.ObjectReply;
+import mware_lib.transferobjects.ObjectRequest;
 
-public class NameServiceImpl extends NameService {
+public final class NameServiceImpl extends NameService {
 
   protected final String address;
   protected final int port;
@@ -26,11 +32,51 @@ public class NameServiceImpl extends NameService {
 
   @Override
   public void rebind(final Object servant, final String name) {
-
+    send(Marshalling.marshal(
+      new BindingContainer(name, servant)
+    ));
   }
 
   @Override
   public Object resolve(final String name) {
+    return requestAndGetReply(Marshalling.marshal(
+      new ObjectRequest(name)
+    ));
+  }
+  
+  private boolean send(final String str) {
+    try {
+      send(str, new Socket(address, port));
+      return true;
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  private void send(final String str, final Socket socket) throws IOException {
+    socket.getOutputStream().write((str+"\n").getBytes());
+  }
+  
+  private Object requestAndGetReply(final String str) {
+    try {
+      Socket socket = new Socket(address, port);
+      send(str, socket);
+      BufferedReader reader = new BufferedReader(
+        new InputStreamReader(socket.getInputStream()));
+
+      String line = reader.readLine();
+      Object obj = Marshalling.unmarshal(line);
+      if(obj instanceof ObjectReply) {
+        return ((ObjectReply)obj).getObject();
+      }
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     return null;
   }
 
