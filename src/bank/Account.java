@@ -40,7 +40,6 @@ public class Account extends cash_access.Account {
 
   @Override
   public double getBalance() {
-    // TODO Auto-generated method stub
     return balance;
   }
 }
