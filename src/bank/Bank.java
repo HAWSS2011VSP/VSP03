@@ -27,10 +27,10 @@ public class Bank extends branch_access.Manager {
 	 * @param port 
 	 * @param address 
 	 */
-	public Bank(String accountPrefix, String address, int port) {
+	public Bank(String accountPrefix, ObjectBroker objBroker) {
 		AccountTable = new Hashtable<String, Account>();
 		OwnerTable = new Hashtable<String, String>();
-		objBroker = ObjectBroker.getBroker(address, port);
+		this.objBroker = objBroker;
 		
 		// Kontnummernzaehler initialisieren
 		AccountCounter = 999;  
@@ -131,7 +131,7 @@ public class Bank extends branch_access.Manager {
 			}
 			
 			// Manager
-			Bank myBank = new Bank(myPrefix, address, port);
+			Bank myBank = new Bank(myPrefix, objBroker);
 			
 			// GUI
 			BankWindow myGUI = new BankWindow(myName, myBank);

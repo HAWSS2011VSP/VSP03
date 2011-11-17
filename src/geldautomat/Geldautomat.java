@@ -15,6 +15,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import cash_access.OverdraftException;
+
+import bank.Account;
+import bank.Bank;
+
+import mware_lib.NameService;
+import mware_lib.ObjectBroker;
+
 /**
  * GUI-basierte Hauptanwendung des Geldautomaten.
  * 
@@ -33,6 +41,7 @@ public class Geldautomat extends Frame implements ActionListener {
 	private static String DoneMessage = "Done.";
 	
 	private int AnzSerienEinzahlung;
+	private ObjectBroker objBroker;
 	
 	/**
 	 * Statuszeile des Fensters
@@ -67,10 +76,13 @@ public class Geldautomat extends Frame implements ActionListener {
 	/**
 	 * Konstruktor. 
 	 * Aufbau der GUI.
+	 * @param objBroker 
 	 *
 	 */
-	public Geldautomat() {
+	public Geldautomat(ObjectBroker objBroker) {
 		super("Bancomat");
+		
+		this.objBroker = objBroker;
 		
 		AnzSerienEinzahlung = 20000;
 		
@@ -191,15 +203,17 @@ public class Geldautomat extends Frame implements ActionListener {
 				StatusLabel.setErrorText("Kontofeld leer bzw. null");
 			else {
 
-				/*---------------------------------------------
-				 * TODO: Kontostand abfragen.
-				 * 
-				 * --------------------------------------------
-				 */
-				
-				
-				//TODO: Kontostandanzeige in GUI aktualisieren:
-				//KontostandTextField.setText(...); 
+				//Kontostand abfragen
+				NameService nameSvc = objBroker.getNameService();
+				Object accountObj = nameSvc.resolve(kontoID);
+				if(accountObj instanceof Account){
+					Account account = (Account) accountObj;
+					
+					//Kontostandanzeige in GUI aktualisieren:
+					KontostandTextField.setText(""+account.getBalance()); 
+				}else{
+					StatusLabel.setErrorText("Konto existiert nicht!");
+				}
 				
 				StatusLabel.setInfoText(DoneMessage);
 			}
@@ -215,14 +229,18 @@ public class Geldautomat extends Frame implements ActionListener {
 					StatusLabel.setErrorText("Kontofeld leer bzw. null");
 				else {
 					
-					/*-----------------------------
-					 * TODO: Einzahlen veranlassen
-					 * ----------------------------
-					 */
-
-					
-					//TODO: Kontostandanzeige aktualisieren:
-					//KontostandTextField.setText(...);
+					//Einzahlen veranlassen
+					NameService nameSvc = objBroker.getNameService();
+					Object accountObj = nameSvc.resolve(kontoID);
+					if(accountObj instanceof Account){
+						Account account = (Account) accountObj;
+						account.deposit(betrag);
+						
+						//Kontostandanzeige in GUI aktualisieren:
+						KontostandTextField.setText(""+account.getBalance()); 
+					}else{
+						StatusLabel.setErrorText("Konto existiert nicht!");
+					}
 					
 					StatusLabel.setInfoText(DoneMessage);
 				}
@@ -241,15 +259,22 @@ public class Geldautomat extends Frame implements ActionListener {
 					StatusLabel.setErrorText("Kontofeld leer bzw. null");
 				else {
 					
-					/*-----------------------------
-					 * TODO: Abheben veranlassen
-					 * ----------------------------
-					 */
-					
-
-					
-					// TODO: Kontostandanzeige aktualisieren:
-					//KontostandTextField.setText(...);
+					//Abheben veranlassen
+					NameService nameSvc = objBroker.getNameService();
+					Object accountObj = nameSvc.resolve(kontoID);
+					if(accountObj instanceof Account){
+						Account account = (Account) accountObj;
+						try {
+							account.withdraw(betrag);
+							
+							//Kontostandanzeige in GUI aktualisieren:
+							KontostandTextField.setText(""+account.getBalance()); 
+						} catch (OverdraftException e1) {
+							StatusLabel.setErrorText(e1.getMessage());
+						}
+					}else{
+						StatusLabel.setErrorText("Konto existiert nicht!");
+					}
 					
 					StatusLabel.setInfoText(DoneMessage);
 				}
@@ -264,8 +289,20 @@ public class Geldautomat extends Frame implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length>0 && !args[0].equals("--help")) {
-			Geldautomat kundenDienst = new Geldautomat();
+		if (args.length>=2 && !args[0].equals("--help")) {
+			ObjectBroker objBroker;
+			int port;
+			String address = args[0];
+			
+			try{
+				port = Integer.parseInt(args[2]);
+				objBroker = ObjectBroker.getBroker(address, port);
+			}catch (Exception e) {
+				System.err.println("Usage: java geldautomat.Geldautomat <name-service-host> <name-service-port>");
+				return;
+			} 
+			
+			Geldautomat kundenDienst = new Geldautomat(objBroker);
 			kundenDienst.setVisible(true);		
 		} else {
 			System.err.println("Usage: java geldautomat.Geldautomat <name-service-host> <name-service-port>");

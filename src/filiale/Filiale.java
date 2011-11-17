@@ -13,6 +13,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import bank.Bank;
+
+import mware_lib.NameService;
+import mware_lib.ObjectBroker;
+
 /**
  * GUI-basierte Hauptanwendung des Geldautomaten.
  * 
@@ -25,6 +30,7 @@ public class Filiale extends Frame implements ActionListener {
 	private Button NeuesKontoButton, KontoLoeschenButton;
 	// Statuszeile
 	private StatusLine StatusLabel;
+	private ObjectBroker objBroker;
 		
 	/**
 	 * Statuszeile des Fensters
@@ -59,10 +65,13 @@ public class Filiale extends Frame implements ActionListener {
 	/**
 	 * Konstruktor. 
 	 * Aufbau der GUI.
+	 * @param objBroker 
 	 *
 	 */
-	public Filiale() {
+	public Filiale(ObjectBroker objBroker) {
 		super("Filiale");
+		
+		this.objBroker = objBroker;
 				
 		//--- Layout manager
 		GridBagConstraints constraints=new GridBagConstraints();
@@ -174,16 +183,18 @@ public class Filiale extends Frame implements ActionListener {
 				String kontoIDneu = null;
 				String accountOwner = OwnerTextField.getText();
 				
-				/*--------------------------------------
-				* TODO: Neues Konto einrichten lassen
-				* -------------------------------------
-				*/
-				
-				
-				// TODO: Wenn erfolgreich: 
-				StatusLabel.setInfoText("Neues konto mit ID "+ kontoIDneu +" für " + accountOwner + " eingerichtet");
-				KontoTextFieldNeu.setText(kontoIDneu); // ins Kontofeld eintragen				
-				// TODO ...sonst Fehler melden!
+				// Neues Konto einrichten lassen
+				NameService nameSvc = objBroker.getNameService();
+				Object bankObj = nameSvc.resolve(BankTextField.getText());
+				if(bankObj instanceof Bank){
+					Bank bank = (Bank) bankObj;
+					kontoIDneu = bank.createAccount(accountOwner);
+					
+					StatusLabel.setInfoText("Neues konto mit ID "+ kontoIDneu +" für " + accountOwner + " eingerichtet");
+					KontoTextFieldNeu.setText(kontoIDneu); // ins Kontofeld eintragen				
+				}else{
+					StatusLabel.setErrorText("Die Bank existiert nicht!");
+				}
 			}
 		} else if (e.getSource() == KontoLoeschenButton) {
 			if (BankTextField.getText().trim().length()==0 ) {
@@ -193,16 +204,20 @@ public class Filiale extends Frame implements ActionListener {
 			} else {
 				String kontoID = KontoTextFieldDelete.getText();
 
-				/*--------------------------------------
-				* TODO: Konto loeschen lassen
-				* -------------------------------------
-				*/
-				
-				
-				
-				// TODO: Wenn erfolgreich: 
-				StatusLabel.setInfoText("Konto mit ID "+ kontoID +" gelöscht");
-				// TODO ...sonst Fehler melden!
+				// Konto loeschen lassen
+				NameService nameSvc = objBroker.getNameService();
+				Object bankObj = nameSvc.resolve(BankTextField.getText());
+				if(bankObj instanceof Bank){
+					Bank bank = (Bank) bankObj;
+					boolean successDelete = bank.removeAccount(kontoID);
+					if(successDelete){
+						StatusLabel.setInfoText("Konto mit ID "+ kontoID +" gelöscht");
+					}else{
+						StatusLabel.setErrorText("Das Konto existiert nicht!");
+					}			
+				}else{
+					StatusLabel.setErrorText("Die Bank existiert nicht!");
+				}
 			}
 		}
 	}
@@ -211,8 +226,20 @@ public class Filiale extends Frame implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length>0 && !args[0].equals("--help")) {
-			Filiale kundenDienst = new Filiale();
+		if (args.length>=2 && !args[0].equals("--help")) {
+			ObjectBroker objBroker;
+			int port;
+			String address = args[0];
+			
+			try{
+				port = Integer.parseInt(args[2]);
+				objBroker = ObjectBroker.getBroker(address, port);
+			}catch (Exception e) {
+				System.err.println("Usage: java filiale.Filiale <name-service-host> <name-service-port>");
+				return;
+			} 
+			
+			Filiale kundenDienst = new Filiale(objBroker);
 			kundenDienst.setVisible(true);			
 		} else {
 			System.err.println("Usage: java filiale.Filiale <name-service-host> <name-service-port>");
