@@ -12,8 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.xml.bind.JAXBException;
-
 import mware_lib.NameService;
 
 public class NameServiceImpl extends NameService {
@@ -87,11 +85,7 @@ public class NameServiceImpl extends NameService {
         System.out.println("Accepting client "
             + client.getInetAddress().getHostAddress() + " on port "
             + client.getPort() + "...");
-        try {
-          pool.execute(new RequestHandler(client, storage));
-        } catch (JAXBException e) {
-          e.printStackTrace();
-        }
+        pool.execute(new RequestHandler(client, storage));
       }
     } catch (UnknownHostException e) {
       System.err.println("Host could not be determined.");
