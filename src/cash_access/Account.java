@@ -1,6 +1,6 @@
 package cash_access;
 
-public abstract class Account { // - Konto, FunktionalitŠt s.u. -
+public abstract class Account { // - Konto, Funktionalitï¿½t s.u. -
   public abstract void deposit(double amount);
 
   public abstract void withdraw(double amount) throws OverdraftException;

@@ -19,6 +19,7 @@ import mware_lib.transferobjects.BindingContainer;
 import mware_lib.transferobjects.Marshalling;
 import mware_lib.transferobjects.ObjectReply;
 import mware_lib.transferobjects.ObjectRequest;
+import mware_lib.transferobjects.Transportable;
 
 public final class NameServiceImpl extends NameService {
 
@@ -33,7 +34,7 @@ public final class NameServiceImpl extends NameService {
   @Override
   public void rebind(final Object servant, final String name) {
     send(Marshalling.marshal(
-      new BindingContainer(name, servant)
+      new BindingContainer(name, (Transportable)servant)
     ));
   }
 
@@ -45,13 +46,23 @@ public final class NameServiceImpl extends NameService {
   }
   
   private boolean send(final String str) {
+    Socket socket = null;
     try {
-      send(str, new Socket(address, port));
+      socket = new Socket(address, port);
+      send(str, socket);
       return true;
     } catch (UnknownHostException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      try {
+        if(socket != null) {
+          socket.close();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
     return false;
   }
@@ -61,8 +72,9 @@ public final class NameServiceImpl extends NameService {
   }
   
   private Object requestAndGetReply(final String str) {
+    Socket socket = null;
     try {
-      Socket socket = new Socket(address, port);
+      socket = new Socket(address, port);
       send(str, socket);
       BufferedReader reader = new BufferedReader(
         new InputStreamReader(socket.getInputStream()));
@@ -76,19 +88,28 @@ public final class NameServiceImpl extends NameService {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      if(socket != null) {
+        try {
+          socket.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        } 
+      }
     }
     return null;
   }
 
   protected final static class NameServiceStorage {
-    final Map<String, Object> objects;
-    final ReadWriteLock locker = new ReentrantReadWriteLock();
+    final Map<String, String> objects;
+    final ReadWriteLock locker;
 
     public NameServiceStorage() {
-      objects = new HashMap<String, Object>();
+      objects = new HashMap<String, String>();
+      locker = new ReentrantReadWriteLock();
     }
 
-    public void put(final String id, final Object obj) {
+    public void put(final String id, final String obj) {
       try {
         locker.writeLock().lock();
         objects.put(id, obj);
@@ -97,7 +118,7 @@ public final class NameServiceImpl extends NameService {
       }
     }
 
-    public Object get(String id) {
+    public String get(String id) {
       try {
         locker.readLock().lock();
         return objects.get(id);
