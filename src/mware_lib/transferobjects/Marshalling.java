@@ -12,20 +12,19 @@ import javax.xml.bind.Unmarshaller;
 public class Marshalling {
   private static Marshaller marshaller;
   private static Unmarshaller unmarshaller;
-  
+
   static {
     try {
-      JAXBContext context = JAXBContext.newInstance(
-          BindingContainer.class,
-          ObjectRequest.class,
-          ObjectReply.class);
+      JAXBContext context = JAXBContext.newInstance(BindingContainer.class,
+          ObjectRequest.class, ObjectReply.class, RemoteCall.class,
+          ExceptionReply.class, CallReply.class);
       marshaller = context.createMarshaller();
       unmarshaller = context.createUnmarshaller();
-    } catch(JAXBException e) {
+    } catch (JAXBException e) {
       e.printStackTrace();
     }
   }
-  
+
   public static String marshal(Object obj) {
     Writer writer = new StringWriter();
     try {
@@ -35,7 +34,7 @@ public class Marshalling {
     }
     return writer.toString();
   }
-  
+
   public static Object unmarshal(String str) {
     try {
       return unmarshaller.unmarshal(new StringReader(str));

@@ -18,9 +18,9 @@ final public class BindingContainer {
     object = null;
   }
 
-  public BindingContainer(final String id, final Transportable object) {
+  public BindingContainer(final String id, final String object) {
     this.id = id;
-    this.object = object.toTransportString();
+    this.object = object;
   }
 
   public String getId() {

@@ -1,21 +1,21 @@
-package mware_lib.impl;
+package nameservice;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import mware_lib.impl.NameServiceImpl.NameServiceStorage;
 import mware_lib.transferobjects.BindingContainer;
 import mware_lib.transferobjects.Marshalling;
 import mware_lib.transferobjects.ObjectReply;
 import mware_lib.transferobjects.ObjectRequest;
+import nameservice.NameserviceMain.NameServiceStorage;
 
 final class RequestHandler implements Runnable {
 
   private final NameServiceStorage storage;
   private final Socket client;
-  
+
   public RequestHandler(Socket client, NameServiceStorage storage) {
     this.storage = storage;
     this.client = client;
@@ -47,11 +47,11 @@ final class RequestHandler implements Runnable {
 
   private void handle(String line) throws IOException {
     Object obj = Marshalling.unmarshal(line);
-      if (obj instanceof BindingContainer) {
-        handle((BindingContainer) obj);
-      } else if (obj instanceof ObjectRequest) {
-        handle((ObjectRequest) obj);
-      }
+    if (obj instanceof BindingContainer) {
+      handle((BindingContainer) obj);
+    } else if (obj instanceof ObjectRequest) {
+      handle((ObjectRequest) obj);
+    }
   }
 
   private void handle(BindingContainer binding) {
@@ -61,7 +61,8 @@ final class RequestHandler implements Runnable {
 
   private void handle(ObjectRequest request) throws IOException {
     System.out.println("Object with key " + request.getId() + " requested...");
-    client.getOutputStream().write((Marshalling.marshal(
-      new ObjectReply(request.getId(), storage.get(request.getId()))) + "\n").getBytes());
+    client.getOutputStream().write(
+        (Marshalling.marshal(new ObjectReply(request.getId(), storage.get(
+            request.getId()).toString())) + "\n").getBytes());
   }
 }
