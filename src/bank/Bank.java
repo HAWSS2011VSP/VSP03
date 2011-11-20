@@ -1,7 +1,7 @@
 package bank;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import mware_lib.NameService;
 import mware_lib.ObjectBroker;
@@ -11,9 +11,9 @@ import mware_lib.ObjectBroker;
  * 
  */
 public class Bank extends branch_access.Manager {
-  private Hashtable<String, Account> AccountTable; // interne Liste der Konten
-  private Hashtable<String, String> OwnerTable; // interne Liste der
-                                                // Kontoinhaber
+  private Map<String, Account> AccountTable; // interne Liste der Konten
+  private Map<String, String> OwnerTable; // interne Liste der
+                                          // Kontoinhaber
 
   private String AccountPrefix; // fuer bankuebergreifend eindeutige Konto-IDs
 
@@ -30,8 +30,8 @@ public class Bank extends branch_access.Manager {
    * @param address
    */
   public Bank(String accountPrefix, NameService ns) {
-    AccountTable = new Hashtable<String, Account>();
-    OwnerTable = new Hashtable<String, String>();
+    AccountTable = new HashMap<String, Account>();
+    OwnerTable = new HashMap<String, String>();
     this.ns = ns;
 
     // Kontnummernzaehler initialisieren
@@ -86,14 +86,12 @@ public class Bank extends branch_access.Manager {
    * 
    * @return Liste mit Kontostaenden.
    */
-  public Hashtable<String, Double> getBalanceList() {
-    Hashtable<String, Double> balanceList = new Hashtable<String, Double>();
-
-    Enumeration<String> keys = AccountTable.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
+  public Map<String, Double> getBalanceList() {
+    Map<String, Double> balanceList = new HashMap<String, Double>();
+    for (String key : AccountTable.keySet()) {
       balanceList.put(key, new Double(AccountTable.get(key).getBalance()));
     }
+
     return balanceList;
   }
 
@@ -102,7 +100,7 @@ public class Bank extends branch_access.Manager {
    * 
    * @return Liste mit Namen der Kontoinhaber.
    */
-  public Hashtable<String, String> getOwnerList() {
+  public Map<String, String> getOwnerList() {
     return OwnerTable;
   }
 
@@ -149,7 +147,7 @@ public class Bank extends branch_access.Manager {
 
   @Override
   public boolean removeAccount(String accountID) {
-    if (!AccountTable.contains(accountID))
+    if (!AccountTable.containsKey(accountID))
       return false;
 
     // ...aus die Anzeigeiste

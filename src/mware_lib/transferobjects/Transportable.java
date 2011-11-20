@@ -1,5 +1,5 @@
 package mware_lib.transferobjects;
 
-public interface Transportable {
-  String toTransportString();
+public abstract class Transportable {
+  public abstract Class<?> getRemoteClass();
 }

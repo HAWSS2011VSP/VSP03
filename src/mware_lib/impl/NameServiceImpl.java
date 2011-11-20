@@ -16,6 +16,7 @@ import mware_lib.transferobjects.BindingContainer;
 import mware_lib.transferobjects.Marshalling;
 import mware_lib.transferobjects.ObjectReply;
 import mware_lib.transferobjects.ObjectRequest;
+import mware_lib.transferobjects.Transportable;
 
 public final class NameServiceImpl extends NameService {
 
@@ -51,10 +52,8 @@ public final class NameServiceImpl extends NameService {
 
   private String stringify(Object servant, String name) {
     String klass = "";
-    if (servant.getClass().getSimpleName().equals("Account")) {
-      klass = "cash_access.impl.Account";
-    } else if (servant.getClass().getSimpleName().equals("Bank")) {
-      klass = "branch_access.impl.Manager";
+    if (servant instanceof Transportable) {
+      klass = ((Transportable) servant).getRemoteClass().getCanonicalName();
     }
     String host = "";
     try {

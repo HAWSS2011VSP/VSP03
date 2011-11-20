@@ -15,7 +15,6 @@ import java.awt.event.WindowEvent;
 
 import mware_lib.NameService;
 import mware_lib.ObjectBroker;
-import bank.Bank;
 import branch_access.Manager;
 
 /**
@@ -211,8 +210,8 @@ public class Filiale extends Frame implements ActionListener {
         // Konto loeschen lassen
         NameService nameSvc = objBroker.getNameService();
         Object bankObj = nameSvc.resolve(BankTextField.getText());
-        if (bankObj instanceof Bank) {
-          Bank bank = (Bank) bankObj;
+        if (bankObj instanceof Manager) {
+          Manager bank = (Manager) bankObj;
           boolean successDelete = bank.removeAccount(kontoID);
           if (successDelete) {
             StatusLabel.setInfoText("Konto mit ID " + kontoID + " gelöscht");
