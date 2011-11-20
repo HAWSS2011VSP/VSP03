@@ -28,6 +28,7 @@ public class Account extends cash_access.Account {
   @Override
   public void withdraw(double amount) throws OverdraftException {
     Object result = client.sendRPC(new RemoteCall(name, "withdraw", amount));
+    System.out.println("Got reply: " + result.toString());
     if (result instanceof ExceptionReply) {
       ExceptionReply e = (ExceptionReply) result;
       if (e.getExceptionType().equals("cash_access.OverdraftException")) {

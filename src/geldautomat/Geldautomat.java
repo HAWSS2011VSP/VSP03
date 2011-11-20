@@ -296,14 +296,13 @@ public class Geldautomat extends Frame implements ActionListener {
 
               // Kontostandanzeige in GUI aktualisieren:
               KontostandTextField.setText("" + account.getBalance());
+              StatusLabel.setInfoText(DoneMessage);
             } catch (OverdraftException e1) {
               StatusLabel.setErrorText(e1.getMessage());
             }
           } else {
             StatusLabel.setErrorText("Konto existiert nicht!");
           }
-
-          StatusLabel.setInfoText(DoneMessage);
         }
       } catch (NumberFormatException e1) {
         StatusLabel.setErrorText("Ungültiger Betrag!");
