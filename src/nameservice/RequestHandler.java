@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import mware_lib.impl.NameServiceStorage;
 import mware_lib.transferobjects.BindingContainer;
 import mware_lib.transferobjects.Marshalling;
 import mware_lib.transferobjects.ObjectReply;
 import mware_lib.transferobjects.ObjectRequest;
-import nameservice.NameserviceMain.NameServiceStorage;
 
 final class RequestHandler implements Runnable {
 

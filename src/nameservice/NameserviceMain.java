@@ -5,42 +5,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import mware_lib.impl.NameServiceStorage;
 
 public class NameserviceMain {
-
-  protected final static class NameServiceStorage {
-    final Map<String, Object> objects;
-    final ReadWriteLock locker;
-
-    public NameServiceStorage() {
-      objects = new HashMap<String, Object>();
-      locker = new ReentrantReadWriteLock();
-    }
-
-    public void put(final String id, final Object obj) {
-      try {
-        locker.writeLock().lock();
-        objects.put(id, obj);
-      } finally {
-        locker.writeLock().unlock();
-      }
-    }
-
-    public Object get(String id) {
-      try {
-        locker.readLock().lock();
-        return objects.get(id);
-      } finally {
-        locker.readLock().unlock();
-      }
-    }
-  }
 
   public static void main(String[] args) throws IOException {
     int port = 1337; // default port

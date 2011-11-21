@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import mware_lib.impl.NameServiceImpl.NameServiceStorage;
 import mware_lib.transferobjects.CallReply;
 import mware_lib.transferobjects.ExceptionReply;
 import mware_lib.transferobjects.Marshalling;
