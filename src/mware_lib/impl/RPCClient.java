@@ -40,4 +40,11 @@ public class RPCClient {
   private void reopenSock() throws UnknownHostException, IOException {
     sock = new Socket(host, port);
   }
+
+  @Override
+  protected void finalize() throws Throwable {
+    if (sock != null && !sock.isClosed())
+      sock.close();
+    super.finalize();
+  }
 }
