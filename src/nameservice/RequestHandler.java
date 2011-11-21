@@ -61,8 +61,9 @@ final class RequestHandler implements Runnable {
 
   private void handle(ObjectRequest request) throws IOException {
     System.out.println("Object with key " + request.getId() + " requested...");
+    Object obj = storage.get(request.getId());
     client.getOutputStream().write(
-        (Marshalling.marshal(new ObjectReply(request.getId(), storage.get(
-            request.getId()).toString())) + "\n").getBytes());
+        (Marshalling.marshal(new ObjectReply(request.getId(), obj == null ? ""
+            : obj.toString())) + "\n").getBytes());
   }
 }

@@ -205,16 +205,15 @@ public class Geldautomat extends Frame implements ActionListener {
         // Kontostand abfragen
         NameService nameSvc = objBroker.getNameService();
         Object accountObj = nameSvc.resolve(kontoID);
-        if (accountObj instanceof Account) {
+        if (accountObj != null && accountObj instanceof Account) {
           Account account = (Account) accountObj;
 
           // Kontostandanzeige in GUI aktualisieren:
           KontostandTextField.setText("" + account.getBalance());
+          StatusLabel.setInfoText(DoneMessage);
         } else {
           StatusLabel.setErrorText("Konto existiert nicht!");
         }
-
-        StatusLabel.setInfoText(DoneMessage);
       }
     } else if (e.getSource() == EinzahlenButton) {
       try {
@@ -236,11 +235,10 @@ public class Geldautomat extends Frame implements ActionListener {
 
             // Kontostandanzeige in GUI aktualisieren:
             KontostandTextField.setText("" + account.getBalance());
+            StatusLabel.setInfoText(DoneMessage);
           } else {
             StatusLabel.setErrorText("Konto existiert nicht!");
           }
-
-          StatusLabel.setInfoText(DoneMessage);
         }
       } catch (NumberFormatException e1) {
         StatusLabel.setErrorText("Ungültiger Betrag!");
@@ -266,11 +264,10 @@ public class Geldautomat extends Frame implements ActionListener {
 
             // Kontostandanzeige in GUI aktualisieren:
             KontostandTextField.setText("" + account.getBalance());
+            StatusLabel.setInfoText(DoneMessage);
           } else {
             StatusLabel.setErrorText("Konto existiert nicht!");
           }
-
-          StatusLabel.setInfoText(DoneMessage);
         }
       } catch (NumberFormatException e1) {
         StatusLabel.setErrorText("Ungültiger Betrag!");
