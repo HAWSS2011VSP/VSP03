@@ -17,7 +17,7 @@ public class Account extends cash_access.Account {
     this.name = name;
     this.port = port;
     this.host = host;
-    this.client = new RPCClient(host, port);
+    this.client = new RPCClient(this.host, this.port);
   }
 
   @Override
@@ -33,6 +33,8 @@ public class Account extends cash_access.Account {
       ExceptionReply e = (ExceptionReply) result;
       if (e.getExceptionType().equals("cash_access.OverdraftException")) {
         throw new OverdraftException(e.getMessage());
+      } else {
+        throw new RuntimeException(e.getMessage());
       }
     }
   }
@@ -42,6 +44,8 @@ public class Account extends cash_access.Account {
     Object result = client.sendRPC(new RemoteCall(name, "getBalance"));
     if (result instanceof CallReply) {
       return (Double) ((CallReply) result).getObject();
+    } else if (result instanceof ExceptionReply) {
+      throw new RuntimeException(((ExceptionReply) result).getMessage());
     }
     return 0.0;
   }

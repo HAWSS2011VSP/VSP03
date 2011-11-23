@@ -2,6 +2,7 @@ package branch_access.impl;
 
 import mware_lib.impl.RPCClient;
 import mware_lib.transferobjects.CallReply;
+import mware_lib.transferobjects.ExceptionReply;
 import mware_lib.transferobjects.RemoteCall;
 
 public final class Manager extends branch_access.Manager {
@@ -24,6 +25,8 @@ public final class Manager extends branch_access.Manager {
         .sendRPC(new RemoteCall(name, "createAccount", owner));
     if (result instanceof CallReply) {
       return (String) ((CallReply) result).getObject();
+    } else if (result instanceof ExceptionReply) {
+      throw new RuntimeException(((ExceptionReply) result).getMessage());
     }
     return null;
   }
@@ -34,6 +37,8 @@ public final class Manager extends branch_access.Manager {
         accountID));
     if (result instanceof CallReply) {
       return (Boolean) ((CallReply) result).getObject();
+    } else if (result instanceof ExceptionReply) {
+      throw new RuntimeException(((ExceptionReply) result).getMessage());
     }
     return false;
   }

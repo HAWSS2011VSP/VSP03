@@ -10,24 +10,27 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 public class Marshalling {
-  private static Marshaller marshaller;
-  private static Unmarshaller unmarshaller;
 
+  private static JAXBContext context;
+	
   static {
-    try {
-      JAXBContext context = JAXBContext.newInstance(BindingContainer.class,
-          ObjectRequest.class, ObjectReply.class, RemoteCall.class,
-          ExceptionReply.class, CallReply.class);
-      marshaller = context.createMarshaller();
-      unmarshaller = context.createUnmarshaller();
-    } catch (JAXBException e) {
-      e.printStackTrace();
-    }
+	try {
+	  context = JAXBContext.newInstance(BindingContainer.class,
+		          ObjectRequest.class, ObjectReply.class, RemoteCall.class,
+		          ExceptionReply.class, CallReply.class);
+	} catch (JAXBException e) {
+		// TODO Auto-generated catch block
+		context = null;
+		e.printStackTrace();
+	}
   }
-
+  
   public static String marshal(Object obj) {
+	  
+	Marshaller marshaller = null;
     Writer writer = new StringWriter();
     try {
+      marshaller = context.createMarshaller();
       marshaller.marshal(obj, writer);
     } catch (JAXBException e) {
       e.printStackTrace();
@@ -37,6 +40,7 @@ public class Marshalling {
 
   public static Object unmarshal(String str) {
     try {
+      Unmarshaller unmarshaller = context.createUnmarshaller();
       return unmarshaller.unmarshal(new StringReader(str));
     } catch (JAXBException e) {
       e.printStackTrace();
