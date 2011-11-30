@@ -22,7 +22,10 @@ public class Account extends cash_access.Account {
 
   @Override
   public void deposit(double amount) {
-    client.sendRPC(new RemoteCall(name, "deposit", amount));
+    Object result = client.sendRPC(new RemoteCall(name, "deposit", amount));
+    if (result instanceof ExceptionReply) {
+      throw new RuntimeException(((ExceptionReply) result).getMessage());
+    }
   }
 
   @Override

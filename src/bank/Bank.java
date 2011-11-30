@@ -70,6 +70,8 @@ public class Bank extends branch_access.Manager {
 
   @Override
   public String createAccount(String ownerName) {
+    if (ownerName.equals("DR"))
+      throw new RuntimeException("So nicht!");
     // Neues Kontoobjekt
     Account newAccount = setupAccount(ownerName);
     // ID des neuen Kontos
@@ -129,7 +131,7 @@ public class Bank extends branch_access.Manager {
       NameService nameSvc = objBroker.getNameService();
 
       // Manager
-      Bank myBank = new Bank(myPrefix+myName, nameSvc);
+      Bank myBank = new Bank(myPrefix + myName, nameSvc);
 
       // GUI
       BankWindow myGUI = new BankWindow(myName, myBank);
